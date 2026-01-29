@@ -57,9 +57,9 @@ export class TypeScriptAnalyzer implements LanguageAnalyzer {
       definitions.push({
         name,
         startLine: position.line,
-        startColumn: nameIndex + 1,
+        startColumn: position.column + nameIndex,
         endLine: position.line,
-        endColumn: nameIndex + 1 + name.length,
+        endColumn: position.column + nameIndex + name.length,
         kind: 'function'
       });
     }
@@ -77,9 +77,9 @@ export class TypeScriptAnalyzer implements LanguageAnalyzer {
       definitions.push({
         name,
         startLine: position.line,
-        startColumn: nameIndex + 1,
+        startColumn: position.column + nameIndex,
         endLine: position.line,
-        endColumn: nameIndex + 1 + name.length,
+        endColumn: position.column + nameIndex + name.length,
         kind: 'function'
       });
     }
@@ -97,9 +97,9 @@ export class TypeScriptAnalyzer implements LanguageAnalyzer {
       definitions.push({
         name,
         startLine: position.line,
-        startColumn: nameIndex + 1,
+        startColumn: position.column + nameIndex,
         endLine: position.line,
-        endColumn: nameIndex + 1 + name.length,
+        endColumn: position.column + nameIndex + name.length,
         kind: 'class'
       });
     }
@@ -117,9 +117,9 @@ export class TypeScriptAnalyzer implements LanguageAnalyzer {
       definitions.push({
         name,
         startLine: position.line,
-        startColumn: nameIndex + 1,
+        startColumn: position.column + nameIndex,
         endLine: position.line,
-        endColumn: nameIndex + 1 + name.length,
+        endColumn: position.column + nameIndex + name.length,
         kind: 'class' // Using 'class' for interface as it's similar
       });
     }
@@ -137,9 +137,9 @@ export class TypeScriptAnalyzer implements LanguageAnalyzer {
       definitions.push({
         name,
         startLine: position.line,
-        startColumn: nameIndex + 1,
+        startColumn: position.column + nameIndex,
         endLine: position.line,
-        endColumn: nameIndex + 1 + name.length,
+        endColumn: position.column + nameIndex + name.length,
         kind: 'class' // Using 'class' for type alias
       });
     }
@@ -171,9 +171,9 @@ export class TypeScriptAnalyzer implements LanguageAnalyzer {
       definitions.push({
         name,
         startLine: position.line,
-        startColumn: nameIndex + 1,
+        startColumn: position.column + nameIndex,
         endLine: position.line,
-        endColumn: nameIndex + 1 + name.length,
+        endColumn: position.column + nameIndex + name.length,
         kind: 'variable'
       });
     }

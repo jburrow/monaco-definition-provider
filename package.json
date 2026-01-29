@@ -1,15 +1,15 @@
 {
   "name": "monaco-definition-provider",
   "version": "1.0.0",
-  "description": "Jump to definition provider for Monaco Editor using tree-sitter for Python and TypeScript",
+  "description": "Jump to definition provider for Monaco Editor supporting Python and TypeScript",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
   "files": [
@@ -25,10 +25,10 @@
   "keywords": [
     "monaco-editor",
     "definition-provider",
-    "tree-sitter",
     "python",
     "typescript",
-    "jump-to-definition"
+    "jump-to-definition",
+    "go-to-definition"
   ],
   "author": "jburrow",
   "license": "MIT",
@@ -36,8 +36,7 @@
     "monaco-editor": ">=0.30.0"
   },
   "dependencies": {
-    "monaco-editor": "^0.52.0",
-    "web-tree-sitter": "^0.24.7"
+    "monaco-editor": "^0.52.0"
   },
   "devDependencies": {
     "@types/node": "^22.12.0",

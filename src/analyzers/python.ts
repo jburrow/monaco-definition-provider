@@ -48,38 +48,6 @@ export class PythonAnalyzer implements LanguageAnalyzer {
         endColumn: namePosition.column + name.length,
         kind: 'function'
       });
-
-      // Also find parameters within this function
-      this.findParameters(match[0], namePosition.line, definitions);
-    }
-  }
-
-  private findParameters(funcDef: string, funcLine: number, definitions: SymbolDefinition[]): void {
-    const paramMatch = /\(([^)]*)\)/.exec(funcDef);
-    if (!paramMatch) return;
-    
-    const paramString = paramMatch[1];
-    const params = paramString.split(',');
-    let colOffset = funcDef.indexOf('(') + 1;
-    
-    for (const param of params) {
-      const trimmed = param.trim();
-      if (!trimmed || trimmed === 'self' || trimmed === 'cls') continue;
-      
-      // Handle type annotations: param: Type = default
-      const paramName = trimmed.split(/[=:]/)[0].trim();
-      if (paramName && /^\w+$/.test(paramName)) {
-        const paramStart = colOffset + param.indexOf(paramName) + 1;
-        definitions.push({
-          name: paramName,
-          startLine: funcLine,
-          startColumn: paramStart,
-          endLine: funcLine,
-          endColumn: paramStart + paramName.length,
-          kind: 'parameter'
-        });
-      }
-      colOffset += param.length + 1; // +1 for comma
     }
   }
 
