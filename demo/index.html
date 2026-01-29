@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,44 +13,54 @@
       background: #1e1e1e;
       color: #d4d4d4;
     }
+
     h1 {
       margin-top: 0;
       color: #569cd6;
     }
+
     .container {
       display: flex;
       gap: 20px;
       flex-wrap: wrap;
     }
+
     .editor-container {
       flex: 1;
       min-width: 400px;
     }
+
     .editor-container h2 {
       color: #4ec9b0;
       margin-bottom: 10px;
     }
-    #python-editor, #typescript-editor {
+
+    #python-editor,
+    #typescript-editor {
       width: 100%;
       height: 400px;
       border: 1px solid #3c3c3c;
     }
+
     .instructions {
       background: #2d2d2d;
       padding: 15px;
       border-radius: 5px;
       margin-bottom: 20px;
     }
+
     .instructions ul {
       margin: 10px 0;
       padding-left: 20px;
     }
+
     .instructions code {
       background: #3c3c3c;
       padding: 2px 6px;
       border-radius: 3px;
       color: #ce9178;
     }
+
     .log {
       background: #2d2d2d;
       padding: 15px;
@@ -58,30 +69,36 @@
       max-height: 200px;
       overflow-y: auto;
     }
+
     .log h3 {
       margin-top: 0;
       color: #dcdcaa;
     }
+
     .log-entry {
       font-family: 'Consolas', 'Monaco', monospace;
       font-size: 12px;
       padding: 5px 0;
       border-bottom: 1px solid #3c3c3c;
     }
+
     .log-entry:last-child {
       border-bottom: none;
     }
+
     .log-external {
       color: #4fc1ff;
     }
+
     .log-local {
       color: #4ec9b0;
     }
   </style>
 </head>
+
 <body>
   <h1>Monaco Definition Provider Demo</h1>
-  
+
   <div class="instructions">
     <strong>How to use:</strong>
     <ul>
@@ -91,7 +108,7 @@
       <li>External navigation callbacks are logged below</li>
     </ul>
   </div>
-  
+
   <div class="container">
     <div class="editor-container">
       <h2>Python</h2>
@@ -102,7 +119,7 @@
       <div id="typescript-editor"></div>
     </div>
   </div>
-  
+
   <div class="log">
     <h3>Navigation Log</h3>
     <div id="log-content"></div>
@@ -111,10 +128,10 @@
   <script type="module">
     import * as monaco from 'monaco-editor';
     import { DefinitionProvider } from '/src/index.ts';
-    
+
     // Initialize Monaco workers for local bundle
     self.MonacoEnvironment = {
-      getWorker: function(workerId, label) {
+      getWorker: function (workerId, label) {
         const getWorkerModule = (moduleUrl, label) => {
           return new Worker(new URL(moduleUrl, import.meta.url), { type: 'module', name: label });
         };
@@ -137,7 +154,7 @@
         }
       }
     };
-    
+
     function log(message, type = 'local') {
       const logContent = document.getElementById('log-content');
       const entry = document.createElement('div');
@@ -145,23 +162,23 @@
       entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
       logContent.insertBefore(entry, logContent.firstChild);
     }
-    
+
     // Create definition provider with external navigation callback
     const provider = new DefinitionProvider({
       onExternalNavigation: async (symbolName, importPath, currentUri) => {
         log(`External navigation requested: ${symbolName} from "${importPath}"`, 'external');
-        
+
         // In a real application, you would:
         // 1. Resolve the import path to an actual file
         // 2. Load or fetch the file content
         // 3. Find the symbol definition in that file
         // 4. Return the location
-        
+
         // For demo purposes, we'll just log and return null
         return null;
       }
     });
-    
+
     // Python sample code
     const pythonCode = `# Python Demo - Click on symbols to navigate!
 
@@ -255,7 +272,7 @@ const value = double(21);  // Click on 'double'!
       lineNumbers: 'on',
       automaticLayout: true
     });
-    
+
     // Create TypeScript editor
     const typescriptEditor = monaco.editor.create(document.getElementById('typescript-editor'), {
       value: typescriptCode,
@@ -266,12 +283,13 @@ const value = double(21);  // Click on 'double'!
       lineNumbers: 'on',
       automaticLayout: true
     });
-    
+
     // Register the provider for both languages
     provider.register('python');
     provider.register('typescript');
-    
+
     log('Definition provider initialized for Python and TypeScript', 'local');
   </script>
 </body>
+
 </html>
