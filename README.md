@@ -13,7 +13,7 @@ A jump-to-definition provider for Monaco Editor that supports **Python** and **T
 ## Installation
 
 ```bash
-npm install monaco-definition-provider
+pnpm add monaco-definition-provider
 ```
 
 ## Quick Start
@@ -184,8 +184,8 @@ const user: User = { name: 'Alice' };  // Click on 'User' -> jumps to line 3
 ## Running the Demo
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Then open http://localhost:3000 in your browser.
@@ -194,16 +194,16 @@ Then open http://localhost:3000 in your browser.
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Run tests
-npm test
+pnpm test
 
 # Type check
-npm run lint
+pnpm lint
 
 # Build
-npm run build
+pnpm build
 ```
 
 ## License
