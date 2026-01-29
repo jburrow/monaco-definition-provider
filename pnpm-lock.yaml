@@ -12,6 +12,9 @@ importers:
         specifier: ^0.52.0
         version: 0.52.2
     devDependencies:
+      '@types/estree':
+        specifier: ^1.0.8
+        version: 1.0.8
       '@types/node':
         specifier: ^22.12.0
         version: 22.19.7

@@ -109,16 +109,32 @@
   </div>
 
   <script type="module">
-    import * as monaco from 'https://esm.sh/monaco-editor@0.52.0';
+    import * as monaco from 'monaco-editor';
     import { DefinitionProvider } from '/src/index.ts';
     
-    // Initialize Monaco AMD loader for workers
+    // Initialize Monaco workers for local bundle
     self.MonacoEnvironment = {
-      getWorkerUrl: function(moduleId, label) {
-        return `data:text/javascript;charset=utf-8,${encodeURIComponent(`
-          self.MonacoEnvironment = { baseUrl: 'https://esm.sh/monaco-editor@0.52.0/min/' };
-          importScripts('https://esm.sh/monaco-editor@0.52.0/min/vs/base/worker/workerMain.js');
-        `)}`;
+      getWorker: function(workerId, label) {
+        const getWorkerModule = (moduleUrl, label) => {
+          return new Worker(new URL(moduleUrl, import.meta.url), { type: 'module', name: label });
+        };
+        switch (label) {
+          case 'json':
+            return getWorkerModule('monaco-editor/esm/vs/language/json/json.worker?worker', label);
+          case 'css':
+          case 'scss':
+          case 'less':
+            return getWorkerModule('monaco-editor/esm/vs/language/css/css.worker?worker', label);
+          case 'html':
+          case 'handlebars':
+          case 'razor':
+            return getWorkerModule('monaco-editor/esm/vs/language/html/html.worker?worker', label);
+          case 'typescript':
+          case 'javascript':
+            return getWorkerModule('monaco-editor/esm/vs/language/typescript/ts.worker?worker', label);
+          default:
+            return getWorkerModule('monaco-editor/esm/vs/editor/editor.worker?worker', label);
+        }
       }
     };
     
