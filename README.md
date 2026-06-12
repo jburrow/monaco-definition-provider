@@ -7,6 +7,8 @@ Scope-aware jump-to-definition for [Monaco Editor](https://microsoft.github.io/m
 - 📂 **Lazy multi-file workspace**: open editor models are indexed automatically; a `loadFile` hook lets your app fetch any other file the moment a definition points into it
 - 🔌 **Extensible**: register analyzers for additional languages
 
+📖 Integrating into an existing app? Follow the step-by-step **[Integration Guide](docs/INTEGRATION.md)** — URI conventions, wasm serving, backend wiring, tab-system navigation, and troubleshooting.
+
 ## Installation
 
 ```bash
@@ -87,7 +89,7 @@ monaco.editor.registerEditorOpener({
 });
 ```
 
-Without this, same-file jumps work but cross-file jumps silently do nothing. See [demo/main.ts](demo/main.ts) for a complete working example with two editor panes and a simulated file server.
+Without this, same-file jumps work but cross-file jumps silently do nothing. See [demo/main.ts](demo/main.ts) for a complete working example with two editor panes and a simulated file server, or the [Integration Guide](docs/INTEGRATION.md) for wiring this into a tab-based app.
 
 ## Serving the WASM files
 
