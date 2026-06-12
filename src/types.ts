@@ -1,42 +1,9 @@
-import type * as monaco from 'monaco-editor';
-
 /**
- * Information about a symbol definition found in the code
+ * A resolved definition location. URI is a string (a stringified monaco Uri).
+ * Lines/columns are 1-based, matching Monaco conventions.
  */
-export interface SymbolDefinition {
-  /** Name of the symbol */
-  name: string;
-  /** Start line (1-based) */
-  startLine: number;
-  /** Start column (1-based) */
-  startColumn: number;
-  /** End line (1-based) */
-  endLine: number;
-  /** End column (1-based) */
-  endColumn: number;
-  /** Type of the symbol (function, class, variable, etc.) */
-  kind: SymbolKind;
-}
-
-/**
- * Types of symbols that can be found
- */
-export type SymbolKind = 
-  | 'function'
-  | 'class'
-  | 'method'
-  | 'variable'
-  | 'parameter'
-  | 'import'
-  | 'module';
-
-/**
- * Result of a definition lookup
- */
-export interface DefinitionResult {
-  /** The URI where the definition is located */
+export interface DefinitionLocation {
   uri: string;
-  /** The range of the definition */
   range: {
     startLineNumber: number;
     startColumn: number;
@@ -45,71 +12,97 @@ export interface DefinitionResult {
   };
 }
 
-/**
- * Callback for handling cross-document navigation
- * Called when a definition is found in a different document than the current one.
- * 
- * @param symbolName - The name of the symbol to navigate to
- * @param importPath - The import path/module name if available
- * @param currentUri - The URI of the current document
- * @returns A promise that resolves to the definition result, or null if not found
- */
-export type ExternalNavigationCallback = (
-  symbolName: string,
-  importPath: string | undefined,
-  currentUri: string
-) => Promise<DefinitionResult | null>;
-
-/**
- * Options for configuring the definition provider
- */
-export interface DefinitionProviderOptions {
-  /**
-   * Callback invoked when navigation to an external document is needed.
-   * If not provided, only same-document definitions will be resolved.
-   */
-  onExternalNavigation?: ExternalNavigationCallback;
-  
-  /**
-   * Whether to include built-in symbols (like print, len in Python)
-   * Default: false
-   */
-  includeBuiltins?: boolean;
+/** A document the library can read — an open Monaco model or host-loaded content. */
+export interface WorkspaceDocument {
+  uri: string;
+  getValue(): string;
 }
 
 /**
- * Interface for language-specific AST analyzers
+ * Narrow view of the workspace handed to language analyzers.
+ * Implemented by WorkspaceIndex; trivially fakeable in tests.
+ */
+export interface WorkspaceAccess {
+  /** Get an already-known document by exact URI, or null. */
+  getDocument(uri: string): WorkspaceDocument | null;
+  /**
+   * Resolve an import specifier (e.g. Python "..utils.helpers") from a file
+   * to a document — checking open models first, then asking the host's
+   * `loadFile` hook. Returns null when nothing can provide the file.
+   */
+  resolveImport(importPath: string, fromUri: string): Promise<WorkspaceDocument | null>;
+}
+
+/**
+ * Host hook: the library believes a file exists at `uri` but has no model
+ * for it. The host fetches it (server, virtual FS, …) and returns its
+ * content; the library creates a Monaco model from it so subsequent
+ * navigation into that file works natively.
+ *
+ * @param uri Candidate URI computed from the import specifier.
+ * @param importPath The original import specifier as written in source.
+ * @param fromUri URI of the document containing the import.
+ */
+export type LoadFileHook = (
+  uri: string,
+  importPath: string,
+  fromUri: string
+) => Promise<{ uri: string; content: string; languageId?: string } | null>;
+
+/**
+ * Host hook overriding import-specifier → URI mapping. Return one or more
+ * candidate URIs, or null to fall back to the built-in resolution heuristics.
+ */
+export type ResolveModuleUriHook = (
+  importPath: string,
+  fromUri: string
+) => Promise<string | string[] | null> | string | string[] | null;
+
+/**
+ * Escape hatch invoked only when all built-in resolution failed
+ * (replaces v1's `onExternalNavigation`).
+ */
+export type FallbackNavigationHook = (context: {
+  symbolName: string;
+  importPath?: string;
+  fromUri: string;
+}) => Promise<DefinitionLocation | null>;
+
+export interface PythonOptions {
+  /**
+   * URL/path to tree-sitter-python.wasm, or the wasm bytes directly.
+   * Defaults to the copy shipped next to the built library.
+   */
+  grammarWasm?: string | Uint8Array;
+  /** Emscripten locateFile for web-tree-sitter's core runtime wasm. */
+  locateFile?: (fileName: string, scriptDirectory: string) => string;
+}
+
+export interface TypeScriptOptions {
+  /**
+   * Skip definition results inside default lib files (lib.es5.d.ts, …).
+   * Default: true.
+   */
+  ignoreLibFiles?: boolean;
+}
+
+export interface DefinitionProviderOptions {
+  loadFile?: LoadFileHook;
+  resolveModuleUri?: ResolveModuleUriHook;
+  fallbackNavigation?: FallbackNavigationHook;
+  python?: PythonOptions;
+  typescript?: TypeScriptOptions;
+}
+
+/**
+ * A language analyzer resolves definitions for one language.
+ * Async because parser initialization and cross-file loading are async.
  */
 export interface LanguageAnalyzer {
-  /**
-   * Find all symbol definitions in the given source code
-   */
-  findDefinitions(source: string): SymbolDefinition[];
-  
-  /**
-   * Find the symbol at the given position in the source code
-   * @param source - The source code
-   * @param line - Line number (1-based)
-   * @param column - Column number (1-based)
-   * @returns The symbol name at that position, or null if none found
-   */
-  getSymbolAtPosition(source: string, line: number, column: number): string | null;
-  
-  /**
-   * Get import information for a symbol
-   * @param source - The source code
-   * @param symbolName - The name of the symbol
-   * @returns The import path if the symbol is imported, or null if it's local
-   */
-  getImportPath(source: string, symbolName: string): string | null;
-}
-
-/**
- * Monaco-compatible definition provider interface
- */
-export interface IDefinitionProvider extends monaco.languages.DefinitionProvider {
-  /**
-   * Dispose of the provider and clean up resources
-   */
-  dispose(): void;
+  provideDefinition(
+    doc: WorkspaceDocument,
+    position: { lineNumber: number; column: number },
+    workspace: WorkspaceAccess
+  ): Promise<DefinitionLocation[] | null>;
+  dispose?(): void;
 }

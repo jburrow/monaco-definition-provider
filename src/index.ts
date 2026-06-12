@@ -1,17 +1,39 @@
-// Main exports
 export { DefinitionProvider, createDefinitionProvider } from './DefinitionProvider';
+export { TsWorkerStrategy, configureTypeScriptDefaults } from './tsWorker';
+export { PythonAnalyzer } from './analyzers/python/PythonAnalyzer';
+export { createPythonParser, initPythonLanguage } from './analyzers/python/parser';
+export { WorkspaceIndex } from './workspace/WorkspaceIndex';
+export {
+  resolvePythonImport,
+  resolveTsImport,
+  commonRoot,
+  uriDirname,
+  uriJoin
+} from './workspace/moduleResolver';
 
-// Types
+export type { PythonParserOptions } from './analyzers/python/parser';
+export type { WorkspaceIndexOptions } from './workspace/WorkspaceIndex';
+export type { TsWorkerStrategyOptions } from './tsWorker';
 export type {
-  SymbolDefinition,
-  SymbolKind,
-  DefinitionResult,
-  ExternalNavigationCallback,
+  DefinitionLocation,
   DefinitionProviderOptions,
+  FallbackNavigationHook,
   LanguageAnalyzer,
-  IDefinitionProvider
+  LoadFileHook,
+  PythonOptions,
+  ResolveModuleUriHook,
+  TypeScriptOptions,
+  WorkspaceAccess,
+  WorkspaceDocument
 } from './types';
-
-// Analyzers
-export { PythonAnalyzer } from './analyzers/python';
-export { TypeScriptAnalyzer } from './analyzers/typescript';
+export type {
+  DefinitionInfoLike,
+  DisposableLike,
+  LanguageServiceDefaultsLike,
+  MonacoLike,
+  PositionLike,
+  TextModelLike,
+  TypeScriptNamespaceLike,
+  TypeScriptWorkerLike,
+  UriLike
+} from './monacoEnv';

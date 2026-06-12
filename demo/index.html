@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -32,13 +32,20 @@
 
     .editor-container h2 {
       color: #4ec9b0;
-      margin-bottom: 10px;
+      margin-bottom: 4px;
+    }
+
+    .filename {
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      color: #858585;
+      margin-bottom: 8px;
     }
 
     #python-editor,
     #typescript-editor {
       width: 100%;
-      height: 400px;
+      height: 420px;
       border: 1px solid #3c3c3c;
     }
 
@@ -86,8 +93,12 @@
       border-bottom: none;
     }
 
-    .log-external {
+    .log-load {
       color: #4fc1ff;
+    }
+
+    .log-open {
+      color: #dcdcaa;
     }
 
     .log-local {
@@ -102,20 +113,22 @@
   <div class="instructions">
     <strong>How to use:</strong>
     <ul>
-      <li>Hold <code>Ctrl</code> (or <code>Cmd</code> on Mac) and click on a symbol to jump to its definition</li>
-      <li>Use <code>F12</code> or right-click → "Go to Definition"</li>
-      <li>Try clicking on function names, class names, and imported symbols</li>
-      <li>External navigation callbacks are logged below</li>
+      <li>Hold <code>Ctrl</code> (or <code>Cmd</code> on Mac) and click a symbol, or press <code>F12</code></li>
+      <li><strong>Scope-aware</strong>: in <code>main.py</code>, the <code>value</code> inside <code>scaled()</code> jumps to the local, not the module global</li>
+      <li><strong>Lazy loading</strong>: <code>helper</code>, <code>CONSTANT</code> and <code>formatUser</code> live in files that are not open â€” the first jump fetches them from a simulated server (watch the log), then lands on the exact symbol</li>
+      <li>Clicking inside strings or comments does nothing â€” it's a real parser, not regex</li>
     </ul>
   </div>
 
   <div class="container">
     <div class="editor-container">
       <h2>Python</h2>
+      <div class="filename" id="python-filename">main.py</div>
       <div id="python-editor"></div>
     </div>
     <div class="editor-container">
       <h2>TypeScript</h2>
+      <div class="filename" id="typescript-filename">app.ts</div>
       <div id="typescript-editor"></div>
     </div>
   </div>
@@ -125,171 +138,7 @@
     <div id="log-content"></div>
   </div>
 
-  <script type="module">
-    import * as monaco from 'monaco-editor';
-    import { DefinitionProvider } from '/src/index.ts';
-
-    // Initialize Monaco workers for local bundle
-    self.MonacoEnvironment = {
-      getWorker: function (workerId, label) {
-        const getWorkerModule = (moduleUrl, label) => {
-          return new Worker(new URL(moduleUrl, import.meta.url), { type: 'module', name: label });
-        };
-        switch (label) {
-          case 'json':
-            return getWorkerModule('monaco-editor/esm/vs/language/json/json.worker?worker', label);
-          case 'css':
-          case 'scss':
-          case 'less':
-            return getWorkerModule('monaco-editor/esm/vs/language/css/css.worker?worker', label);
-          case 'html':
-          case 'handlebars':
-          case 'razor':
-            return getWorkerModule('monaco-editor/esm/vs/language/html/html.worker?worker', label);
-          case 'typescript':
-          case 'javascript':
-            return getWorkerModule('monaco-editor/esm/vs/language/typescript/ts.worker?worker', label);
-          default:
-            return getWorkerModule('monaco-editor/esm/vs/editor/editor.worker?worker', label);
-        }
-      }
-    };
-
-    function log(message, type = 'local') {
-      const logContent = document.getElementById('log-content');
-      const entry = document.createElement('div');
-      entry.className = `log-entry log-${type}`;
-      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-      logContent.insertBefore(entry, logContent.firstChild);
-    }
-
-    // Create definition provider with external navigation callback
-    const provider = new DefinitionProvider({
-      onExternalNavigation: async (symbolName, importPath, currentUri) => {
-        log(`External navigation requested: ${symbolName} from "${importPath}"`, 'external');
-
-        // In a real application, you would:
-        // 1. Resolve the import path to an actual file
-        // 2. Load or fetch the file content
-        // 3. Find the symbol definition in that file
-        // 4. Return the location
-
-        // For demo purposes, we'll just log and return null
-        return null;
-      }
-    });
-
-    // Python sample code
-    const pythonCode = `# Python Demo - Click on symbols to navigate!
-
-from math import sqrt, pi
-from typing import List, Dict
-import json
-
-# Try clicking on 'greet' below to jump here!
-def greet(name: str) -> str:
-    """Say hello to someone."""
-    return f"Hello, {name}!"
-
-class Calculator:
-    """A simple calculator class."""
-    
-    def __init__(self):
-        self.result = 0
-    
-    def add(self, a: int, b: int) -> int:
-        """Add two numbers."""
-        return a + b
-    
-    def square_root(self, n: float) -> float:
-        """Calculate square root using imported sqrt."""
-        return sqrt(n)  # Click on 'sqrt' - external!
-
-# Usage examples
-message = greet("World")  # Click on 'greet' here!
-calc = Calculator()  # Click on 'Calculator' here!
-
-# Click on 'json' or 'pi' to see external navigation
-data = json.dumps({"pi": pi})
-`;
-
-    // TypeScript sample code
-    const typescriptCode = `// TypeScript Demo - Click on symbols to navigate!
-
-import { readFile } from 'fs';
-import * as path from 'path';
-
-// Click on 'User' below to jump here!
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
-// Click on 'greet' references to jump here!
-function greet(user: User): string {
-  return \`Hello, \${user.name}!\`;
-}
-
-// Arrow function - click on 'double' to jump here!
-const double = (n: number): number => n * 2;
-
-class UserService {
-  private users: User[] = [];
-  
-  addUser(user: User): void {
-    this.users.push(user);
-  }
-  
-  findUser(id: number): User | undefined {
-    return this.users.find(u => u.id === id);
-  }
-}
-
-// Usage examples
-const service = new UserService();  // Click on 'UserService'!
-
-const newUser: User = {  // Click on 'User'!
-  id: 1,
-  name: "Alice",
-  email: "alice@example.com"
-};
-
-service.addUser(newUser);
-const message = greet(newUser);  // Click on 'greet'!
-const value = double(21);  // Click on 'double'!
-
-// Click on 'readFile' or 'path' to see external navigation
-`;
-
-    // Create Python editor
-    const pythonEditor = monaco.editor.create(document.getElementById('python-editor'), {
-      value: pythonCode,
-      language: 'python',
-      theme: 'vs-dark',
-      minimap: { enabled: false },
-      fontSize: 14,
-      lineNumbers: 'on',
-      automaticLayout: true
-    });
-
-    // Create TypeScript editor
-    const typescriptEditor = monaco.editor.create(document.getElementById('typescript-editor'), {
-      value: typescriptCode,
-      language: 'typescript',
-      theme: 'vs-dark',
-      minimap: { enabled: false },
-      fontSize: 14,
-      lineNumbers: 'on',
-      automaticLayout: true
-    });
-
-    // Register the provider for both languages
-    provider.register('python');
-    provider.register('typescript');
-
-    log('Definition provider initialized for Python and TypeScript', 'local');
-  </script>
+  <script type="module" src="./main.ts"></script>
 </body>
 
 </html>

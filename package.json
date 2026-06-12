@@ -1,22 +1,33 @@
 {
   "name": "monaco-definition-provider",
-  "version": "1.0.0",
-  "description": "Jump to definition provider for Monaco Editor supporting Python and TypeScript",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "version": "2.0.0",
+  "description": "Scope-aware jump-to-definition for Monaco Editor: tree-sitter-backed Python analysis, TypeScript language-service integration, and lazy multi-file workspace navigation",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./tree-sitter-python.wasm": "./dist/tree-sitter-python.wasm"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "dev": "vite",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -27,22 +38,30 @@
     "definition-provider",
     "python",
     "typescript",
+    "tree-sitter",
     "jump-to-definition",
     "go-to-definition"
   ],
   "author": "jburrow",
   "license": "MIT",
   "peerDependencies": {
-    "monaco-editor": ">=0.30.0"
+    "monaco-editor": ">=0.34.0"
   },
   "dependencies": {
-    "monaco-editor": "^0.52.0"
+    "web-tree-sitter": "^0.26.9"
   },
   "devDependencies": {
-    "@types/estree": "^1.0.8",
     "@types/node": "^22.12.0",
+    "monaco-editor": "^0.52.0",
+    "tree-sitter-python": "0.25.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.7.3",
     "vite": "^6.0.11",
     "vitest": "^3.0.5"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
