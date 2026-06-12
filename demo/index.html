@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -114,21 +114,21 @@
     <strong>How to use:</strong>
     <ul>
       <li>Hold <code>Ctrl</code> (or <code>Cmd</code> on Mac) and click a symbol, or press <code>F12</code></li>
-      <li><strong>Scope-aware</strong>: in <code>main.py</code>, the <code>value</code> inside <code>scaled()</code> jumps to the local, not the module global</li>
-      <li><strong>Lazy loading</strong>: <code>helper</code>, <code>CONSTANT</code> and <code>formatUser</code> live in files that are not open â€” the first jump fetches them from a simulated server (watch the log), then lands on the exact symbol</li>
-      <li>Clicking inside strings or comments does nothing â€” it's a real parser, not regex</li>
+      <li><strong>The TypeScript pane is this library navigating its own source.</strong> Only <code>src/index.ts</code> is open &mdash; Ctrl+Click any export (<code>DefinitionProvider</code>, <code>TsWorkerStrategy</code>, <code>WorkspaceIndex</code>, &hellip;) and the real file is fetched on demand (watch the log), landing on the exact symbol. Keep jumping deeper from there.</li>
+      <li><strong>Scope-aware Python</strong>: the <code>value</code> inside <code>scaled()</code> jumps to the local, not the module global; <code>helper</code> and <code>CONSTANT</code> lazy-load <code>utils.py</code></li>
+      <li>Clicking inside strings or comments does nothing &mdash; it's a real parser, not regex</li>
     </ul>
   </div>
 
   <div class="container">
     <div class="editor-container">
-      <h2>Python</h2>
-      <div class="filename" id="python-filename">main.py</div>
+      <h2>Python &mdash; scope-aware sample</h2>
+      <div class="filename" id="python-filename">python/main.py</div>
       <div id="python-editor"></div>
     </div>
     <div class="editor-container">
-      <h2>TypeScript</h2>
-      <div class="filename" id="typescript-filename">app.ts</div>
+      <h2>TypeScript &mdash; this library's own source</h2>
+      <div class="filename" id="typescript-filename">src/index.ts</div>
       <div id="typescript-editor"></div>
     </div>
   </div>

@@ -4,6 +4,9 @@ import grammarWasmUrl from 'tree-sitter-python/tree-sitter-python.wasm?url';
 import runtimeWasmUrl from 'web-tree-sitter/web-tree-sitter.wasm?url';
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import TsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+// The TypeScript pane navigates this library's own source. Only the entry
+// file is loaded eagerly — every other module is fetched on first jump.
+import indexSource from '../src/index.ts?raw';
 
 self.MonacoEnvironment = {
   getWorker(_workerId: string, label: string) {
@@ -27,9 +30,25 @@ function log(message: string, type: LogType = 'local') {
   logContent.insertBefore(entry, logContent.firstChild);
 }
 
-// ----- Simulated server: files that exist but are NOT open as models -----
-const serverFiles: Record<string, string> = {
-  'file:///workspace/utils.py': [
+// ----- The "server": this project's real source, fetched lazily -----
+// import.meta.glob gives one dynamic import per file; in the built site each
+// loadFile call is a genuine network request for that source file.
+const projectSources = import.meta.glob(['../src/**/*.ts', '!../src/__tests__/**'], {
+  query: '?raw',
+  import: 'default'
+}) as Record<string, () => Promise<string>>;
+
+const PROJECT_ROOT = 'file:///project/';
+
+function uriToGlobKey(uri: string): string | null {
+  if (!uri.startsWith(PROJECT_ROOT)) return null;
+  return `../${uri.slice(PROJECT_ROOT.length)}`;
+}
+
+// Python has no project source to navigate (this library is TypeScript), so
+// the python pane serves a sample exercising the scope-aware features.
+const pythonServerFiles: Record<string, string> = {
+  'file:///project/python/utils.py': [
     '"""Utility helpers (lazily loaded)."""',
     '',
     'CONSTANT = 42',
@@ -39,27 +58,23 @@ const serverFiles: Record<string, string> = {
     '    """Multiply by the magic constant."""',
     '    return x * CONSTANT',
     ''
-  ].join('\n'),
-  'file:///workspace/helpers.ts': [
-    'export interface User {',
-    '  id: number;',
-    '  name: string;',
-    '}',
-    '',
-    'export function formatUser(user: User): string {',
-    '  return `#${user.id} ${user.name}`;',
-    '}',
-    ''
   ].join('\n')
 };
 
 async function fetchFromServer(uri: string): Promise<string | null> {
-  // Simulate network latency.
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return serverFiles[uri] ?? null;
+  // Real project source — a real dynamic import (network fetch when built).
+  const globKey = uriToGlobKey(uri);
+  if (globKey && projectSources[globKey]) {
+    return projectSources[globKey]();
+  }
+  // Python sample files get simulated latency.
+  if (uri in pythonServerFiles) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return pythonServerFiles[uri];
+  }
+  return null;
 }
 
-// ----- Open files -----
 const pythonCode = [
   '# main.py — Ctrl+Click symbols to navigate',
   'from utils import helper, CONSTANT',
@@ -81,26 +96,15 @@ const pythonCode = [
   ''
 ].join('\n');
 
-const typescriptCode = [
-  '// app.ts — Ctrl+Click symbols to navigate',
-  "import { formatUser, User } from './helpers';",
-  '',
-  'const alice: User = { id: 1, name: "Alice" };',
-  '',
-  '// helpers.ts is not open — the first jump lazy-loads it.',
-  'console.log(formatUser(alice));',
-  ''
-].join('\n');
-
 const pythonModel = monaco.editor.createModel(
   pythonCode,
   'python',
-  monaco.Uri.parse('file:///workspace/main.py')
+  monaco.Uri.parse('file:///project/python/main.py')
 );
 const typescriptModel = monaco.editor.createModel(
-  typescriptCode,
+  indexSource,
   'typescript',
-  monaco.Uri.parse('file:///workspace/app.ts')
+  monaco.Uri.parse('file:///project/src/index.ts')
 );
 
 // ----- Provider setup -----
@@ -115,7 +119,7 @@ const provider = new DefinitionProvider(monaco, {
     log(`loadFile: ${uri} (import "${importPath}" in ${fromUri})`, 'load');
     const content = await fetchFromServer(uri);
     if (content === null) {
-      log(`loadFile: ${uri} → not found on server`, 'load');
+      log(`loadFile: ${uri} → not found`, 'load');
       return null;
     }
     log(`loadFile: ${uri} → loaded, model created`, 'load');
@@ -131,7 +135,7 @@ provider.register('javascript');
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   theme: 'vs-dark',
   minimap: { enabled: false },
-  fontSize: 14,
+  fontSize: 13,
   automaticLayout: true
 };
 const pythonEditor = monaco.editor.create(document.getElementById('python-editor')!, {
@@ -154,7 +158,7 @@ monaco.editor.registerEditorOpener({
     const filenameEl = document.getElementById(isPython ? 'python-filename' : 'typescript-filename')!;
 
     editor.setModel(model);
-    filenameEl.textContent = resource.path.replace('/workspace/', '');
+    filenameEl.textContent = resource.path.replace('/project/', '');
     if (selectionOrPosition) {
       const range: monaco.IRange =
         'startLineNumber' in selectionOrPosition
@@ -174,7 +178,7 @@ monaco.editor.registerEditorOpener({
   }
 });
 
-log('Definition provider ready — python (tree-sitter) + typescript (language service)', 'local');
+log('Definition provider ready — navigate this library’s own source in the TypeScript pane', 'local');
 
 // Exposed for debugging/driving the demo from the console.
 (window as unknown as Record<string, unknown>).__demo = {
