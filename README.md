@@ -2,6 +2,8 @@
 
 Scope-aware jump-to-definition for [Monaco Editor](https://microsoft.github.io/monaco-editor/), built for multi-file workspaces where files are loaded lazily.
 
+**▶ [Try the live demo](https://jburrow.github.io/monaco-definition-provider/)** — Ctrl+Click around two editors backed by a simulated file server.
+
 - 🐍 **Python**: real parsing via [tree-sitter](https://tree-sitter.github.io/) — proper scope resolution (LEGB, `global`/`nonlocal`, class-scope rules, comprehensions, walrus), imports (relative, aliased, multi-line), and `module.symbol` navigation
 - 📘 **TypeScript/JavaScript**: delegates to Monaco's built-in TypeScript language service (already scope-aware and multi-model) and adds the missing piece — loading not-yet-open files on demand
 - 📂 **Lazy multi-file workspace**: open editor models are indexed automatically; a `loadFile` hook lets your app fetch any other file the moment a definition points into it
@@ -205,6 +207,10 @@ v2 is a rewrite with a clean API break:
 - TS/JS quality matches Monaco's TypeScript service — this library only adds lazy file loading on top.
 
 ## Demo
+
+**Live**: https://jburrow.github.io/monaco-definition-provider/ (deployed from `main` by [deploy-demo.yml](.github/workflows/deploy-demo.yml))
+
+Locally:
 
 ```bash
 pnpm install
