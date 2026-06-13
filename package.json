@@ -24,7 +24,8 @@
     "node": ">=18"
   },
   "files": [
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsup",
@@ -34,7 +35,9 @@
     "dev": "vite",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm lint && pnpm test"
   },
   "keywords": [
     "monaco-editor",
@@ -47,6 +50,14 @@
   ],
   "author": "jburrow",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jburrow/monaco-definition-provider.git"
+  },
+  "homepage": "https://jburrow.github.io/monaco-definition-provider/",
+  "bugs": {
+    "url": "https://github.com/jburrow/monaco-definition-provider/issues"
+  },
   "peerDependencies": {
     "monaco-editor": ">=0.34.0"
   },

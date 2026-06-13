@@ -190,7 +190,7 @@ provider.register('mylang');
 
 ## Migrating from v1
 
-v2 is a rewrite with a clean API break:
+See the [CHANGELOG](CHANGELOG.md) for the full release history. v2 is a rewrite with a clean API break:
 
 | v1 | v2 |
 | --- | --- |
