@@ -1,0 +1,16 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "dist-demo/api",
+  "name": "monaco-definition-provider",
+  "readme": "none",
+  "includeVersion": true,
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "intentionallyNotExported": ["CancellationTokenLike"],
+  "navigationLinks": {
+    "Demo": "https://jburrow.github.io/monaco-definition-provider/",
+    "GitHub": "https://github.com/jburrow/monaco-definition-provider",
+    "Integration Guide": "https://github.com/jburrow/monaco-definition-provider/blob/main/docs/INTEGRATION.md"
+  }
+}

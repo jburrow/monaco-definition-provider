@@ -9,7 +9,7 @@ Scope-aware jump-to-definition for [Monaco Editor](https://microsoft.github.io/m
 - 📂 **Lazy multi-file workspace**: open editor models are indexed automatically; a `loadFile` hook lets your app fetch any other file the moment a definition points into it
 - 🔌 **Extensible**: register analyzers for additional languages
 
-📖 Integrating into an existing app? Follow the step-by-step **[Integration Guide](docs/INTEGRATION.md)** — URI conventions, wasm serving, backend wiring, tab-system navigation, and troubleshooting.
+📖 Integrating into an existing app? Follow the step-by-step **[Integration Guide](docs/INTEGRATION.md)** — URI conventions, wasm serving, backend wiring, tab-system navigation, and troubleshooting. Full **[API reference](https://jburrow.github.io/monaco-definition-provider/api/)** is generated from source.
 
 ## Installation
 
@@ -208,7 +208,10 @@ v2 is a rewrite with a clean API break:
 
 ## Demo
 
-**Live**: https://jburrow.github.io/monaco-definition-provider/ (deployed from `main` by [deploy-demo.yml](.github/workflows/deploy-demo.yml))
+**Live demo**: https://jburrow.github.io/monaco-definition-provider/
+**API reference**: https://jburrow.github.io/monaco-definition-provider/api/
+
+Both are deployed from `main` by [deploy-demo.yml](.github/workflows/deploy-demo.yml).
 
 Locally:
 

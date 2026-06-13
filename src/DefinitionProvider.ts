@@ -8,6 +8,7 @@ import { PythonAnalyzer } from './analyzers/python/PythonAnalyzer';
 import { TsWorkerStrategy } from './tsWorker';
 import { WorkspaceIndex } from './workspace/WorkspaceIndex';
 
+/** Subset of monaco's CancellationToken used by provideDefinition. */
 interface CancellationTokenLike {
   isCancellationRequested: boolean;
 }

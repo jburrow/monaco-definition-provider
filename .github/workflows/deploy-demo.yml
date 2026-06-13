@@ -1,4 +1,4 @@
-name: Deploy demo
+name: Deploy site
 
 on:
   push:
@@ -37,6 +37,10 @@ jobs:
       - run: pnpm build:demo
         env:
           DEMO_BASE: /monaco-definition-provider/
+
+      # Generate the API reference into dist-demo/api (served at /api/).
+      # Must run after build:demo, which empties dist-demo.
+      - run: pnpm build:docs
 
       - uses: actions/configure-pages@v5
 
